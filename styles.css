@@ -1,0 +1,52 @@
+body {
+    width: 90%;
+    height: 500px;
+    display: inline;
+    margin: 10 auto;
+}
+
+#webcam-container {
+    height: 450px;
+    margin-left: 5px;
+    margin-top: 0px;
+}
+
+canvas {
+    width: 400px;
+    height: 900px;
+}
+
+#start {
+    width: 100px;
+    font-size: 30px;
+    margin-left: 153px;
+    border-radius: 5px;
+    padding: 10px;
+    border: none;
+    background-color: #C35555;
+    color: white;
+}
+
+#label-container {
+    width: 70%;
+    font-size: 28px;
+    margin: 50px 65px;
+}
+
+.prediction-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.class-name {
+    font-weight: bold;
+}
+
+.probability-progress {
+    width: 200px;
+    /* 調整進度條的寬度 */
+    height: 35px;
+    /* 調整進度條的高度 */
+    color: green;
+    /* 進度條的顏色 */
+}

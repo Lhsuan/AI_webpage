@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="styles.css" rel="stylesheet" type="text/css" />
+
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="webcam-container"></div>
+    <button type="button" onclick="init()" id="start">Start</button>
+    <div id="label-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript" 　src="main.js">
+        // More API functions here:
+        // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+
+        // the link to your model provided by Teachable Machine export panel
+        const URL = "https://teachablemachine.withgoogle.com/models/K2MGLfahF/";
+
+        let model, webcam, labelContainer, maxPredictions, webcamContainer;
+        //let currentFacingMode = 'user'; // 預設使用前置攝像頭
+
+        // Load the image model and setup the webcam
+        async function init() {
+
+            if (!webcam) {
+                const modelURL = URL + "model.json";
+                const metadataURL = URL + "metadata.json";
+                const screenWidth = window.screen.width;
+                const screenHeight = window.screen.height;
+
+                // load the model and metadata
+                // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
+                // or files from your local hard drive
+                // Note: the pose library adds "tmImage" object to your window (window.tmImage)
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+
+                // Convenience function to setup a webcam
+                const flip = false; // whether to flip the webcam
+                webcam = new tmImage.Webcam(screenWidth, 850, flip); // width, height, flip
+                await webcam.setup({ facingMode: "environment" }); // request access to the webcam
+                await webcam.play();
+                window.requestAnimationFrame(loop);
+
+                // append elements to the DOM
+                const webcamContainer = document.getElementById("webcam-container");
+                webcamContainer.appendChild(webcam.canvas);
+
+                // 設定webcam.canvas的寬度和高度
+                webcam.canvas.width = screenWidth;
+                webcam.canvas.height = screenHeight;
+
+                labelContainer = document.getElementById("label-container");
+                for (let i = 0; i < maxPredictions; i++) { // and class labels
+                    labelContainer.appendChild(document.createElement("div"));
+                }
+            }
+        }
+
+        async function loop() {
+            webcam.update(); // update the webcam frame
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        // run the webcam image through the image model
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+
+            for (let i = 0; i < maxPredictions; i++) {
+                const classPrediction = prediction[i].className + ": " + (prediction[i].probability * 100).toFixed(0) + "%";;
+                const probability = prediction[i].probability * 100;
+
+
+                // Create a container div for the prediction
+                const predictionContainer = document.createElement("div");
+                predictionContainer.classList.add("prediction-container");
+
+                // Create a span for the class name
+                const classSpan = document.createElement("span");
+                classSpan.classList.add("class-name");
+                classSpan.textContent = classPrediction;
+
+                // Create a progress element for the probability
+                const progressElement = document.createElement("progress");
+                progressElement.classList.add("probability-progress");
+                progressElement.value = probability;
+                progressElement.max = 100;
+
+                // Append the spans and progress element to the container div
+                predictionContainer.appendChild(classSpan);
+                predictionContainer.appendChild(progressElement);
+
+                // Replace the content of the labelContainer with the predictionContainer
+                labelContainer.childNodes[i].innerHTML = "";
+                labelContainer.childNodes[i].appendChild(predictionContainer);
+
+                if (probability > 98) {
+                    const className = prediction[i].className;
+
+                    if (className === "粉撲花") {
+                        alert(`${className}：紅粉撲花以其細長的鮮紅色絲絨狀花絲、半球形的頭狀花序，及特有美麗的雄蕊而著稱，植株高度約50~150公分，葉片為偶數羽狀複葉，展開的花朵具有已退化的縮小花瓣，而雌、雄蕊則長約4公分，雄蕊花絲呈紅色，基部合生為白色。此外，其小葉片在夜間會主動閉合，呈現睡眠運動，白天則再次展開，並且經外力碰觸時不會閉合，呈現類似含羞草的特性。`);
+                    } else if (className === "鼠鞠草") {
+                        alert(`${className}：在清明節左右常常可以在屋子角落的石縫中或是菜圃上看到的一種開著黃色花朵的野生植物，從立夏起就會開始掉葉子，也有叫它厝角草或清明草。鼠麴草不需要種，它若夠成熟自己就會繁殖，種子會飛到土裡面，等到下一年時間到就又長出來了。`);
+                    } else if (className === "桃金孃") {
+                        alert(`${className}：桃金孃是常綠灌木，花朵美麗，粉紅色花瓣，瓶狀果實紅色或紫黑，適合做綠籬和景觀植物，喜陽光，適應性強，種植時需選擇陽光充足、排水良好的地區。
+
+
+
+
+                        `);
+                    }
+                }
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
